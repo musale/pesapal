@@ -59,7 +59,7 @@ class Pesapal:
             token: AccessToken = AccessToken(**response)
         return token
 
-    def update_headers(self, *, headers: Dict[str, str]):
+    def update_headers(self, *, headers: Dict[str, str]) -> None:
         """Updates the header values."""
         self._headers.update(headers)
 
