@@ -6,11 +6,14 @@ def main():
     secret = "osGQ364R49cXKeOYSpaOnT++rHs="
     client = Pesapal(consumer_key=key, consumer_secret=secret)
     if client._token:
-        ipn_url = "https://example.com/ipn/notifications"
-        ipn = client.register_ipn_url(ipn_url=ipn_url)
-        if ipn.status != "200":
-            print(ipn.error)
-        print(ipn)
+        # ipn_url = "https://example.com/ipn/notifications"
+        # ipn = client.register_ipn_url(ipn_url=ipn_url)
+        # if ipn.status != "200":
+        #     print(ipn.error)
+        # print(ipn)
+
+        # list
+        print(client.get_registered_ipns())
 
 
 if __name__ == "__main__":
