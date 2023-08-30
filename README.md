@@ -7,7 +7,7 @@ Unofficial SDK wrapper for the pesapal v3 payments API.
 ## Installation
 
 ```
-pip install pesapal_v3
+pip install pesapal-v3
 ```
 
 ## Usage
