@@ -92,7 +92,11 @@ client.refund(refund)
 
 ## Support
 
-For any issues, bugs or compliments, you can reach out to the developer `martinmshale@gmail.com`. For service level issues, reach out to Pesapal.
+For any issues, bugs you can raise an issue on the project issues board.
+
+For compliments and _gigs_ you can reach out to the developer via email `martinmshale@gmail.com`.
+
+For service level issues, reach out to Pesapal.
 
 Lastly, I need the developer juice to produce more of these open source solutions. Be among the few who have supported these effort by _buying me a coffee_.
 
