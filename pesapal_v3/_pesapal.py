@@ -1,4 +1,5 @@
 """Pesapal API client and api methods."""
+from datetime import datetime, timedelta
 from typing import Dict
 
 import httpx
@@ -9,6 +10,8 @@ from pesapal_v3._types import AccessToken, Environment
 
 class Pesapal:
     """Pesapal client."""
+
+    _token_timeout = 5
 
     def __init__(
         self,
@@ -30,6 +33,15 @@ class Pesapal:
         self._token = self._authenticate(
             consumer_key=consumer_key, consumer_secret=consumer_secret
         )
+        self._instantiation_time = datetime.now()
+
+    def _refresh_token(self) -> bool:
+        now = datetime.now()
+        refresh = (
+            now - self._instantiation_time > timedelta(minutes=self._token_timeout)
+            or now.minute != self._instantiation_time.minute
+        )
+        return refresh
 
     def _authenticate(self, *, consumer_key: str, consumer_secret: str) -> AccessToken:
         with httpx.Client(base_url=self._base_url) as client:
