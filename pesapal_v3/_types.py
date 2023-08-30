@@ -11,6 +11,7 @@ class PesapalError(NamedTuple):
     error_type: str
     code: str
     message: str
+    call_back_url: Optional[str]
 
     def __repr__(self) -> str:
         return (
@@ -81,5 +82,26 @@ class OrderRequestResponse(NamedTuple):
     order_tracking_id: str
     merchant_reference: str
     redirect_url: str
+    error: Optional[PesapalError]
+    status: str
+
+
+class TransactionStatus(NamedTuple):
+    """An order transaction status."""
+
+    payment_method: str
+    amount: float
+    created_date: str
+    confirmation_code: str
+    payment_status_description: str
+    description: str
+    message: str
+    payment_account: str
+    call_back_url: str
+    status_code: str
+    payment_status_code: str
+    currency: str
+    order_tracking_id: str
+    merchant_reference: str
     error: Optional[PesapalError]
     status: str

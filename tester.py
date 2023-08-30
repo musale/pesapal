@@ -23,14 +23,16 @@ order_request = {
     },
 }
 
+order_tracking_id = "6ab46754-fe9a-4cfa-960b-de3ebcf4601f"
+
 
 def main():
     key = "qkio1BGGYAXTu2JOfm7XSXNruoZsrqEW"
     secret = "osGQ364R49cXKeOYSpaOnT++rHs="
     client = Pesapal(consumer_key=key, consumer_secret=secret)
     if client._token:
-        ipn_url = "https://example.com/ipn/notifications"
-        ipn = client.register_ipn_url(ipn_url=ipn_url)
+        # ipn_url = "https://example.com/ipn/notifications"
+        # ipn = client.register_ipn_url(ipn_url=ipn_url)
         # if ipn.status != "200":
         #     print(ipn.error)
         # print(ipn)
@@ -38,8 +40,8 @@ def main():
         # list
         # print(client.get_registered_ipns())
         # make request
-        order_request.update({"notification_id": ipn.ipn_id})
-        print(client.submit_order_request(order_request=order_request))
+        # order_request.update({"notification_id": ipn.ipn_id})
+        print(client.get_transaction_status(order_tracking_id=order_tracking_id))
 
 
 if __name__ == "__main__":
