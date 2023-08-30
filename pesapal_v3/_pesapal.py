@@ -1,12 +1,14 @@
 """Pesapal API client and api methods."""
+import json
 from datetime import datetime, timedelta
-from typing import Dict
-import functools
+from typing import Dict, Optional
 
 import httpx
 
-from pesapal_v3._exceptions import PesapalAuthError
-from pesapal_v3._types import AccessToken, Environment
+from pesapal_v3._exceptions import PesapalAuthError, PesapalIPNURLRegError
+from pesapal_v3._types import (AccessToken, APIError, Environment,
+                               IPNRegistration, IPNRegistrationError,
+                               PesapalError)
 
 
 class Pesapal:
@@ -56,7 +58,9 @@ class Pesapal:
                 consumer_key=self._consumer_key, consumer_secret=self._consumer_secret
             )
 
-    def _authenticate(self, *, consumer_key: str, consumer_secret: str) -> AccessToken:
+    def _authenticate(
+        self, *, consumer_key: str, consumer_secret: str
+    ) -> Optional[AccessToken]:
         with httpx.Client(base_url=self._base_url) as client:
             data = {"consumer_key": consumer_key, "consumer_secret": consumer_secret}
             client_resp = client.post(
@@ -68,9 +72,10 @@ class Pesapal:
                 raise PesapalAuthError(
                     error=error, status=response.get("status", "500")
                 )
-            self._headers.update({"Bearer-Token": response.get("token", "")})
-            token: AccessToken = AccessToken(**response)
-        return token
+            token = response.get("token", "")
+            self._headers.update({"Authorization": f"Bearer {token}"})
+            access_token: Optional[AccessToken] = AccessToken(**response)
+        return access_token
 
     def update_headers(self, *, headers: Dict[str, str]) -> None:
         """Updates the header values."""
@@ -78,7 +83,7 @@ class Pesapal:
 
     def register_ipn_url(
         self, *, ipn_url: str, ipn_notification_type: str = "GET"
-    ) -> None:
+    ) -> IPNRegistration:
         """Register the Instant Payment Notification callback URL.
 
         Arguments:
@@ -87,5 +92,32 @@ class Pesapal:
                 use when triggering the IPN alert. Can be GET or POST.
                 Default is GET.
         """
-        if not self._token:
-            raise ValueError("The access token has not been set.")
+        if not ipn_url:
+            raise ValueError("ipn_url cannot be empty.")
+
+        if not ipn_notification_type:
+            raise ValueError("ipn_notification_type cannot be empty.")
+
+        self._refresh_token()
+        with httpx.Client(base_url=self._base_url) as client:
+            data = {
+                "url": ipn_url,
+                "ipn_notification_type": ipn_notification_type,
+            }
+            client_resp = client.post(
+                "/URLSetup/RegisterIPN", headers=self._headers, json=data
+            )
+            response = client_resp.json()
+
+        message = response.get("message", None)
+        if isinstance(message, str):
+            message = json.loads(message)
+
+        if isinstance(message, dict):
+            error = message.get("error", None)
+            status = message.get("status", "500")
+            if message and error:
+                error_msg = PesapalError(**error)
+                raise PesapalIPNURLRegError(error=error_msg, status=status)
+        ipn: IPNRegistration = IPNRegistration(**response)
+        return ipn
