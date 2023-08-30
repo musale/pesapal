@@ -1,19 +1,14 @@
 """Pesapal API client and api methods."""
 import json
 from datetime import datetime, timedelta
-from typing import Dict, Optional, List
+from typing import Dict, List, Optional
 
 import httpx
 
 from pesapal_v3._exceptions import PesapalAuthError, PesapalIPNURLRegError
-from pesapal_v3._types import (
-    AccessToken,
-    APIError,
-    Environment,
-    IPNRegistration,
-    IPNRegistrationError,
-    PesapalError,
-)
+from pesapal_v3._types import (AccessToken, APIError, Environment,
+                               IPNRegistration, IPNRegistrationError,
+                               PesapalError)
 
 
 class Pesapal:
