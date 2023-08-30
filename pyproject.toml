@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pesapal_v3"
-version = "0.1.0"
+version = "0.1.1"
 description = "A python wrapper of the Pesapal V3 payments API."
 authors = [{ name = "Musale Martin", email = "martinmshale@gmail.com" }]
 readme = "README.md"
