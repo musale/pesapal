@@ -84,7 +84,7 @@ class OrderRequest(NamedTuple):
     billing_address: BillingAddress
     redirect_mode: Optional[RedirectMode]
     account_number: Optional[str]
-    subscription_details: Optional[SubscriptionDetails]
+    subscription_details: SubscriptionDetails
 
 
 class OrderRequestResponse(NamedTuple):

@@ -5,23 +5,15 @@ from typing import Dict, List, Optional
 
 import httpx
 
-from pesapal_v3._exceptions import (
-    PesapalAuthError,
-    PesapalIPNURLRegError,
-    PesapalListIPNsError,
-    PesapalSubmitOrderRequestError,
-    PesapalGetTransactionStatusError,
-)
-from pesapal_v3._types import (
-    AccessToken,
-    Environment,
-    IPNRegistration,
-    OrderRequest,
-    OrderRequestResponse,
-    PesapalError,
-    TransactionStatus,
-    SubscriptionDetails,
-)
+from pesapal_v3._exceptions import (PesapalAuthError,
+                                    PesapalGetTransactionStatusError,
+                                    PesapalIPNURLRegError,
+                                    PesapalListIPNsError,
+                                    PesapalSubmitOrderRequestError)
+from pesapal_v3._types import (AccessToken, Environment, IPNRegistration,
+                               OrderRequest, OrderRequestResponse,
+                               PesapalError, SubscriptionDetails,
+                               TransactionStatus)
 
 
 class Pesapal:
@@ -77,16 +69,16 @@ class Pesapal:
         if not order_request:
             raise ValueError("order_request cannot be empty")
         if is_subscription:
-            account = order_request.get("account", None)
-            subscription = order_request.get("subscription_details", None)
+            account = order_request.account_number
+            subscription = order_request.subscription_details
             if not account:
                 raise ValueError("account is required to create a subscription.")
             if account and bool(subscription):
-                if not subscription.get("start_date", None):
+                if not subscription.start_date:
                     raise ValueError("start_date cannot be empty")
-                if not subscription.get("end_date", None):
+                if not subscription.end_date:
                     raise ValueError("end_date cannot be empty")
-                if not subscription.get("frequency", None):
+                if not subscription.frequency:
                     raise ValueError("frequency cannot be empty")
 
     def _authenticate(self, *, consumer_key: str, consumer_secret: str) -> AccessToken:
