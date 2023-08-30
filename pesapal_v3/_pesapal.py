@@ -37,9 +37,7 @@ class Pesapal:
             client_resp = client.post(
                 "/Auth/RequestToken", headers=self._headers, json=data
             )
-            print(client_resp.request.url)
             response = client_resp.json()
-            print(response)
             error = response.get("error", None)
             if error:
                 raise PesapalAuthError(
