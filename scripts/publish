@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-VERSION_FILE="pesapal/__version__.py"
+VERSION_FILE="pesapal_v3/__version__.py"
 
 if [ -d 'venv' ] ; then
     PREFIX="venv/bin/"
