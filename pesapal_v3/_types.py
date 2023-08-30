@@ -3,6 +3,7 @@ from typing import Literal, NamedTuple, Optional, TypeAlias
 
 Environment: TypeAlias = Literal["sandbox", "production"]
 RedirectMode: TypeAlias = Literal["TOP_WINDOW", "PARENT_WINDOW"]
+SubscriptionFrequency: TypeAlias = Literal["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]
 
 
 class PesapalError(NamedTuple):
@@ -11,6 +12,7 @@ class PesapalError(NamedTuple):
     error_type: str
     code: str
     message: str
+    # call_back_url: Optional[str]
 
     def __repr__(self) -> str:
         return (
@@ -60,6 +62,14 @@ class BillingAddress(NamedTuple):
     zip_code: Optional[str]
 
 
+class SubscriptionDetails(NamedTuple):
+    """Additional details for a subscription."""
+
+    start_date: str
+    end_date: str
+    frequency: SubscriptionFrequency
+
+
 class OrderRequest(NamedTuple):
     """Payload to crate a payment request."""
 
@@ -73,6 +83,8 @@ class OrderRequest(NamedTuple):
     branch: Optional[str]
     billing_address: BillingAddress
     redirect_mode: Optional[RedirectMode]
+    account_number: Optional[str]
+    subscription_details: SubscriptionDetails
 
 
 class OrderRequestResponse(NamedTuple):
@@ -81,5 +93,26 @@ class OrderRequestResponse(NamedTuple):
     order_tracking_id: str
     merchant_reference: str
     redirect_url: str
+    error: Optional[PesapalError]
+    status: str
+
+
+class TransactionStatus(NamedTuple):
+    """An order transaction status."""
+
+    payment_method: str
+    amount: float
+    created_date: str
+    confirmation_code: str
+    payment_status_description: str
+    description: str
+    message: str
+    payment_account: str
+    call_back_url: str
+    status_code: str
+    payment_status_code: str
+    currency: str
+    order_tracking_id: str
+    merchant_reference: str
     error: Optional[PesapalError]
     status: str

@@ -32,3 +32,7 @@ class PesapalSubmitOrderRequestError(PesapalAPIError):
 
 class PesapalListIPNsError(PesapalAPIError):
     """Pesapal list registered IPNs error."""
+
+
+class PesapalGetTransactionStatusError(PesapalAPIError):
+    """Pesapal get a transaction status error."""

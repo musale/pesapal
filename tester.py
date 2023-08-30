@@ -1,7 +1,7 @@
 from pesapal_v3 import Pesapal
 
 order_request = {
-    "id": "s945e4af-80a5-4ec1-8706-e03f8332fb04",
+    "id": "s945e4af-80a5-4ec1-8706-e03f8332fb02",
     "currency": "KES",
     "amount": 350.00,
     "description": "Thank you for this SDK",
@@ -23,6 +23,8 @@ order_request = {
     },
 }
 
+order_tracking_id = "6ab46754-fe9a-4cfa-960b-de3ebcf4601f"
+
 
 def main():
     key = "qkio1BGGYAXTu2JOfm7XSXNruoZsrqEW"
@@ -39,7 +41,22 @@ def main():
         # print(client.get_registered_ipns())
         # make request
         order_request.update({"notification_id": ipn.ipn_id})
-        print(client.submit_order_request(order_request=order_request))
+        order_request.update({"account": "124353132"})
+        order_request.update(
+            {
+                "subscription_details": {
+                    "start_date": "01-09-2023",
+                    "end_date": "01-10-2023",
+                    "frequency": "DAILY",
+                }
+            }
+        )
+        print(
+            client.submit_order_request(
+                order_request=order_request, is_subscription=True
+            )
+        )
+        print(client.get_transaction_status(order_tracking_id=order_tracking_id))
 
 
 if __name__ == "__main__":

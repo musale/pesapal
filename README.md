@@ -24,18 +24,20 @@ client = Pesapal(consumer_key, consumer_secret)
 ### Register IPN
 
 ```python
-resp = client.register_ipn(endpoint="https://example.com/notifications/payments)
+ipn_url = "https://example.com/ipn/notifications"
+ipn = client.register_ipn_url(ipn_url=ipn_url)
 
-if resp.status != "200":
+if ipn.status != "200":
   # error occured registering your IPN
-  print(resp.error)
+  print(ipn.error)
 else:
   # IPN successfully registered
+  print(ipn)
 ```
 
 ### List registered IPNs
 ```python
-ipns = client.get_all_ipns()
+ipns = client.get_registered_ipns()
 print(ipns)
 ```
 
@@ -47,7 +49,7 @@ order_request = {
     "amount": 350.00,
     "description": "Thank you for this SDK",
     "callback_url": "https://example.com/cancellation",
-    "notification_id": "fe078e53-78da-4a83-aa89-e7ded5c456e6"
+    "notification_id": "fe078e53-78da-4a83-aa89-e7ded5c456e6",
     "billing_address": {
         "email_address": "john.doe@example.com",
         "phone_number": "0723xxxxxx",
@@ -62,9 +64,8 @@ order_request = {
         "postal_code": "",
         "zip_code": ""
     }
-
 }
-request = client.submit_order_request(order_request)
+request = client.submit_order_request(order_request=order_request)
 ```
 
 ### Transaction status
@@ -74,7 +75,36 @@ status = client.get_transaction_status(order_tracking_id="b945e4af-80a5-4ec1-870
 
 ### Subscriptions
 ```python
-# TODO
+order_request = {
+    "id": "s945e4af-80a5-4ec1-8706-e03f8332fb04",
+    "currency": "KES",
+    "amount": 350.00,
+    "description": "Thank you for this SDK",
+    "callback_url": "https://example.com/cancellation",
+    "notification_id": "fe078e53-78da-4a83-aa89-e7ded5c456e6",
+    "billing_address": {
+        "email_address": "john.doe@example.com",
+        "phone_number": "0723xxxxxx",
+        "country_code": "KE",
+        "first_name": "John",
+        "middle_name": "",
+        "last_name": "Doe",
+        "line_1": "Pesapal Limited",
+        "line_2": "",
+        "city": "",
+        "state": "",
+        "postal_code": "",
+        "zip_code": ""
+    },
+    "account_number": "555-678",
+    "subscription_details": {
+        "start_date": "24-01-2023",
+        "end_date": "31-12-2023",
+        "frequency": "DAILY"
+    }
+}
+request = client.submit_order_request(order_request=order_request, is_subscription=True)
+print(request)
 ```
 
 ### Refund
