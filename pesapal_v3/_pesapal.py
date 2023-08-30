@@ -1,6 +1,7 @@
 """Pesapal API client and api methods."""
 from datetime import datetime, timedelta
 from typing import Dict
+import functools
 
 import httpx
 
@@ -20,6 +21,15 @@ class Pesapal:
         consumer_secret: str,
         environment: Environment = "sandbox",
     ) -> None:
+        if not consumer_key:
+            raise ValueError("consumer_key cannot be empty")
+
+        if not consumer_secret:
+            raise ValueError("consumer_secret cannot be empty")
+
+        self._consumer_key = consumer_key
+        self._consumer_secret = consumer_secret
+
         if environment == "sandbox":
             self._base_url = "https://cybqa.pesapal.com/pesapalv3/api"
         else:
@@ -31,17 +41,20 @@ class Pesapal:
         }
 
         self._token = self._authenticate(
-            consumer_key=consumer_key, consumer_secret=consumer_secret
+            consumer_key=self._consumer_key, consumer_secret=self._consumer_secret
         )
         self._instantiation_time = datetime.now()
 
-    def _refresh_token(self) -> bool:
+    def _refresh_token(self) -> None:
         now = datetime.now()
         refresh = (
             now - self._instantiation_time > timedelta(minutes=self._token_timeout)
             or now.minute != self._instantiation_time.minute
         )
-        return refresh
+        if refresh:
+            self._token = self._authenticate(
+                consumer_key=self._consumer_key, consumer_secret=self._consumer_secret
+            )
 
     def _authenticate(self, *, consumer_key: str, consumer_secret: str) -> AccessToken:
         with httpx.Client(base_url=self._base_url) as client:
