@@ -1,19 +1,16 @@
 """Pesapal API client and api methods."""
 import json
 from datetime import datetime, timedelta
-from typing import Dict, Optional, List
+from typing import Dict, List, Optional
 
 import httpx
 
-from pesapal_v3._exceptions import PesapalAuthError, PesapalIPNURLRegError
-from pesapal_v3._types import (
-    AccessToken,
-    APIError,
-    Environment,
-    IPNRegistration,
-    IPNRegistrationError,
-    PesapalError,
-)
+from pesapal_v3._exceptions import (PesapalAuthError, PesapalIPNURLRegError,
+                                    PesapalListIPNsError,
+                                    PesapalSubmitOrderRequestError)
+from pesapal_v3._types import (AccessToken, Environment, IPNRegistration,
+                               OrderRequest, OrderRequestResponse,
+                               PesapalError)
 
 
 class Pesapal:
@@ -63,9 +60,7 @@ class Pesapal:
                 consumer_key=self._consumer_key, consumer_secret=self._consumer_secret
             )
 
-    def _authenticate(
-        self, *, consumer_key: str, consumer_secret: str
-    ) -> Optional[AccessToken]:
+    def _authenticate(self, *, consumer_key: str, consumer_secret: str) -> AccessToken:
         with httpx.Client(base_url=self._base_url) as client:
             data = {"consumer_key": consumer_key, "consumer_secret": consumer_secret}
             client_resp = client.post(
@@ -79,8 +74,7 @@ class Pesapal:
                 )
             token = response.get("token", "")
             self._headers.update({"Authorization": f"Bearer {token}"})
-            access_token: Optional[AccessToken] = AccessToken(**response)
-        return access_token
+        return AccessToken(**response)
 
     def update_headers(self, *, headers: Dict[str, str]) -> None:
         """Updates the header values."""
@@ -136,5 +130,32 @@ class Pesapal:
                 headers=self._headers,
             )
             response: List[IPNRegistration] = client_resp.json()
-            print(response)
+        if isinstance(response, dict):
+            error = response.get("error", None)
+            status = response.get("status", "500")
+            if error:
+                error_msg = PesapalError(**error)
+                raise PesapalListIPNsError(error=error_msg, status=status)
         return response
+
+    def submit_order_request(
+        self, *, order_request: OrderRequest
+    ) -> Optional[OrderRequestResponse]:
+        """Process the request to create a payment."""
+        if not order_request:
+            raise ValueError("order_request cannot be empty")
+
+        self._refresh_token()
+        with httpx.Client(base_url=self._base_url) as client:
+            client_resp = client.post(
+                "/Transactions/SubmitOrderRequest",
+                headers=self._headers,
+                json=order_request,
+            )
+            response = client_resp.json()
+        error = response.get("error", None)
+        status = response.get("status", "500")
+        if error:
+            error_msg = PesapalError(**error)
+            raise PesapalSubmitOrderRequestError(error=error_msg, status=status)
+        return OrderRequestResponse(**response)
