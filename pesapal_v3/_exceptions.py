@@ -24,3 +24,11 @@ class PesapalAuthError(PesapalAPIError):
 
 class PesapalIPNURLRegError(PesapalAPIError):
     """Pesapal IPN URL registration error."""
+
+
+class PesapalSubmitOrderRequestError(PesapalAPIError):
+    """Pesapal submit an order request error."""
+
+
+class PesapalListIPNsError(PesapalAPIError):
+    """Pesapal list registered IPNs error."""

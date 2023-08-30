@@ -5,10 +5,20 @@ from typing import Dict, List, Optional
 
 import httpx
 
-from pesapal_v3._exceptions import PesapalAuthError, PesapalIPNURLRegError
-from pesapal_v3._types import (AccessToken, APIError, Environment,
-                               IPNRegistration, IPNRegistrationError,
-                               PesapalError)
+from pesapal_v3._exceptions import (
+    PesapalAuthError,
+    PesapalIPNURLRegError,
+    PesapalSubmitOrderRequestError,
+    PesapalListIPNsError,
+)
+from pesapal_v3._types import (
+    AccessToken,
+    Environment,
+    IPNRegistration,
+    OrderRequest,
+    PesapalError,
+    OrderRequestResponse,
+)
 
 
 class Pesapal:
@@ -131,5 +141,31 @@ class Pesapal:
                 headers=self._headers,
             )
             response: List[IPNRegistration] = client_resp.json()
-            print(response)
+        error = response.get("error", None)
+        status = response.get("status", "500")
+        if error:
+            error_msg = PesapalError(**error)
+            raise PesapalListIPNsError(error=error_msg, status=status)
+        return response
+
+    def submit_order_request(
+        self, *, order_request: OrderRequest
+    ) -> OrderRequestResponse:
+        """Process the request to create a payment."""
+        if not order_request:
+            raise ValueError("order_request cannot be empty")
+
+        self._refresh_token()
+        with httpx.Client(base_url=self._base_url) as client:
+            client_resp = client.post(
+                "/Transactions/SubmitOrderRequest",
+                headers=self._headers,
+                json=order_request,
+            )
+            response = client_resp.json()
+        error = response.get("error", None)
+        status = response.get("status", "500")
+        if error:
+            error_msg = PesapalError(**error)
+            raise PesapalSubmitOrderRequestError(error=error_msg, status=status)
         return response
