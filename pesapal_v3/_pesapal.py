@@ -20,6 +20,7 @@ from pesapal_v3._types import (
     OrderRequestResponse,
     PesapalError,
     TransactionStatus,
+    SubscriptionDetails,
 )
 
 
@@ -70,6 +71,24 @@ class Pesapal:
                 consumer_key=self._consumer_key, consumer_secret=self._consumer_secret
             )
 
+    def _validate_order_request(
+        self, order_request: OrderRequest, is_subscription: bool
+    ) -> None:
+        if not order_request:
+            raise ValueError("order_request cannot be empty")
+        if is_subscription:
+            account = order_request.get("account", None)
+            subscription = order_request.get("subscription_details", None)
+            if not account:
+                raise ValueError("account is required to create a subscription.")
+            if account and bool(subscription):
+                if not subscription.get("start_date", None):
+                    raise ValueError("start_date cannot be empty")
+                if not subscription.get("end_date", None):
+                    raise ValueError("end_date cannot be empty")
+                if not subscription.get("frequency", None):
+                    raise ValueError("frequency cannot be empty")
+
     def _authenticate(self, *, consumer_key: str, consumer_secret: str) -> AccessToken:
         with httpx.Client(base_url=self._base_url) as client:
             data = {"consumer_key": consumer_key, "consumer_secret": consumer_secret}
@@ -78,7 +97,8 @@ class Pesapal:
             )
             response = client_resp.json()
             error = response.get("error", None)
-            if error:
+            status = response.get("status", "500")
+            if status != "200":
                 raise PesapalAuthError(
                     error=error, status=response.get("status", "500")
                 )
@@ -125,7 +145,7 @@ class Pesapal:
         if isinstance(message, dict):
             error = message.get("error", None)
             status = message.get("status", "500")
-            if message and error:
+            if message and status != "200":
                 error_msg = PesapalError(**error)
                 raise PesapalIPNURLRegError(error=error_msg, status=status)
         ipn: IPNRegistration = IPNRegistration(**response)
@@ -143,18 +163,17 @@ class Pesapal:
         if isinstance(response, dict):
             error = response.get("error", None)
             status = response.get("status", "500")
-            if error:
+
+            if status != "200":
                 error_msg = PesapalError(**error)
                 raise PesapalListIPNsError(error=error_msg, status=status)
         return response
 
     def submit_order_request(
-        self, *, order_request: OrderRequest
+        self, *, order_request: OrderRequest, is_subscription: bool = False
     ) -> OrderRequestResponse:
         """Process the request to create a payment."""
-        if not order_request:
-            raise ValueError("order_request cannot be empty")
-
+        self._validate_order_request(order_request, is_subscription)
         self._refresh_token()
         with httpx.Client(base_url=self._base_url) as client:
             client_resp = client.post(
@@ -165,7 +184,7 @@ class Pesapal:
             response = client_resp.json()
         error = response.get("error", None)
         status = response.get("status", "500")
-        if error:
+        if status != "200":
             error_msg = PesapalError(**error)
             raise PesapalSubmitOrderRequestError(error=error_msg, status=status)
         return OrderRequestResponse(**response)
@@ -184,7 +203,7 @@ class Pesapal:
             response = client_resp.json()
         error = response.get("error", None)
         status = response.get("status", "500")
-        if error:
+        if status != "200":
             error_msg = PesapalError(**error)
             raise PesapalGetTransactionStatusError(error=error_msg, status=status)
         return TransactionStatus(**response)

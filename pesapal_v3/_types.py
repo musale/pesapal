@@ -3,6 +3,7 @@ from typing import Literal, NamedTuple, Optional, TypeAlias
 
 Environment: TypeAlias = Literal["sandbox", "production"]
 RedirectMode: TypeAlias = Literal["TOP_WINDOW", "PARENT_WINDOW"]
+SubscriptionFrequency: TypeAlias = Literal["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]
 
 
 class PesapalError(NamedTuple):
@@ -11,7 +12,7 @@ class PesapalError(NamedTuple):
     error_type: str
     code: str
     message: str
-    call_back_url: Optional[str]
+    # call_back_url: Optional[str]
 
     def __repr__(self) -> str:
         return (
@@ -61,6 +62,14 @@ class BillingAddress(NamedTuple):
     zip_code: Optional[str]
 
 
+class SubscriptionDetails(NamedTuple):
+    """Additional details for a subscription."""
+
+    start_date: str
+    end_date: str
+    frequency: SubscriptionFrequency
+
+
 class OrderRequest(NamedTuple):
     """Payload to crate a payment request."""
 
@@ -74,6 +83,8 @@ class OrderRequest(NamedTuple):
     branch: Optional[str]
     billing_address: BillingAddress
     redirect_mode: Optional[RedirectMode]
+    account_number: Optional[str]
+    subscription_details: Optional[SubscriptionDetails]
 
 
 class OrderRequestResponse(NamedTuple):
