@@ -1,14 +1,19 @@
 """Pesapal API client and api methods."""
 import json
 from datetime import datetime, timedelta
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 import httpx
 
 from pesapal_v3._exceptions import PesapalAuthError, PesapalIPNURLRegError
-from pesapal_v3._types import (AccessToken, APIError, Environment,
-                               IPNRegistration, IPNRegistrationError,
-                               PesapalError)
+from pesapal_v3._types import (
+    AccessToken,
+    APIError,
+    Environment,
+    IPNRegistration,
+    IPNRegistrationError,
+    PesapalError,
+)
 
 
 class Pesapal:
@@ -121,3 +126,15 @@ class Pesapal:
                 raise PesapalIPNURLRegError(error=error_msg, status=status)
         ipn: IPNRegistration = IPNRegistration(**response)
         return ipn
+
+    def get_registered_ipns(self) -> List[IPNRegistration]:
+        """Lists all the registered IPN URLS."""
+        self._refresh_token()
+        with httpx.Client(base_url=self._base_url) as client:
+            client_resp = client.get(
+                "/URLSetup/GetIpnList",
+                headers=self._headers,
+            )
+            response: List[IPNRegistration] = client_resp.json()
+            print(response)
+        return response
