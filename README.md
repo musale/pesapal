@@ -2,7 +2,7 @@
 Unofficial SDK wrapper for the pesapal v3 payments API.
 
 ## Requirements
-- python v3.11+
+- python version >= 3.8
 
 ## Installation
 
