@@ -36,3 +36,7 @@ class PesapalListIPNsError(PesapalAPIError):
 
 class PesapalGetTransactionStatusError(PesapalAPIError):
     """Pesapal get a transaction status error."""
+
+
+class PesapalRefundError(PesapalAPIError):
+    """Pesapa refund request error."""

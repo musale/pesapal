@@ -116,3 +116,19 @@ class TransactionStatus(NamedTuple):
     merchant_reference: str
     error: Optional[PesapalError]
     status: str
+
+
+class Refund(NamedTuple):
+    """Refund request payload"""
+
+    confirmation_code: str
+    amount: float
+    username: str
+    remarks: str
+
+
+class RefundResponse(NamedTuple):
+    """A refund response."""
+
+    status: str
+    message: str

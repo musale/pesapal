@@ -5,15 +5,25 @@ from typing import Dict, List, Optional
 
 import httpx
 
-from pesapal_v3._exceptions import (PesapalAuthError,
-                                    PesapalGetTransactionStatusError,
-                                    PesapalIPNURLRegError,
-                                    PesapalListIPNsError,
-                                    PesapalSubmitOrderRequestError)
-from pesapal_v3._types import (AccessToken, Environment, IPNRegistration,
-                               OrderRequest, OrderRequestResponse,
-                               PesapalError, SubscriptionDetails,
-                               TransactionStatus)
+from pesapal_v3._exceptions import (
+    PesapalAuthError,
+    PesapalGetTransactionStatusError,
+    PesapalIPNURLRegError,
+    PesapalListIPNsError,
+    PesapalSubmitOrderRequestError,
+    PesapalRefundError,
+)
+from pesapal_v3._types import (
+    AccessToken,
+    Environment,
+    IPNRegistration,
+    OrderRequest,
+    OrderRequestResponse,
+    PesapalError,
+    TransactionStatus,
+    Refund,
+    RefundResponse,
+)
 
 
 class Pesapal:
@@ -199,3 +209,29 @@ class Pesapal:
             error_msg = PesapalError(**error)
             raise PesapalGetTransactionStatusError(error=error_msg, status=status)
         return TransactionStatus(**response)
+
+    def refund_request(self, *, refund: Refund) -> None:
+        """Perform a refund request.
+
+        Arguments:
+            refund(Refund): the refund details.
+        """
+        if not refund:
+            raise ValueError("refund cannot be empty.")
+
+        self._refresh_token()
+        with httpx.Client(base_url=self._base_url) as client:
+            client_resp = client.post(
+                "/Transactions/RefundRequest",
+                headers=self._headers,
+                json=refund,
+            )
+            response = client_resp.json()
+        error = response.get("error", None)
+        status = response.get("status", "500")
+        print(response)
+
+        if status != "200" and error:
+            error_msg = PesapalError(**error)
+            raise PesapalRefundError(error=error_msg, status=status)
+        return RefundResponse(**response)
